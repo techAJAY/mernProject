@@ -1,91 +1,51 @@
-const User  = require('../models/userModel')
+const User = require('../models/userModel')
 
-exports.createUser = async (req, res)=> {
+const createuser = async (req, res) => {
 
-const reqData = req.body;
-const saveData = await User.create(reqData)
-return res.send(savaData);
+    const reqData = req.body;
+    const saveData = await User.create(reqData)
+    return res.send({ msg: "user crated", data: saveData });
 };
 
-exports.findAll = function(req, res) {
+
+
+const findAll = async (req, res) => {
+    const getuser = await User.find()
+    return res.send({ msg: "get all data ", data: getuser })
 
 };
 
-exports.findOne = function(req, res) {
-    // Find a single note with a noteId
-    Location.findById(req.params.noteId, function(err, data) {
-        if(err) {
-            res.status(500).send({message: "Could not retrieve location with id " + req.params.noteId});
-        } else {
-            res.send(data);
-        }
-    });
+
+const findOne = async (req, res) => {
+    const id = req.params.id
+    const user = await User.findById({ _id: id })
+    const finalUser = await User.find(user)
+    return res.send(finalUser)
+
 };
 
-exports.findLocation = function(req, res, next) {
-  var limit = req.query.limit || 10;
 
-      // get the max distance or set it to 8 kilometers
-      var maxDistance = req.query.distance || 8;
+const update = async (req, res) => {
+    const userData = req.body
+    console.log(userData);
+    const id = req.params.id;
+    const user = await User.findById({ _id: id })
+    const finalupdate = await User.updateOne(userData)
 
-      // we need to convert the distance to radians
-      // the raduis of Earth is approximately 6371 kilometers
-      maxDistance /= 6371;
+    return res.send({ msg: "user updated", finalupdate })
 
-      // get coordinates [ <longitude> , <latitude> ]
-      var coords = [];
-      coords[0] = parseFloat(req.query.longitude) || 0;
-  coords[1] = parseFloat(req.query.latitude) || 0;
-
-      // find a location
-      Location.aggregate(
-        [
-{
-      $geoNear: {
-       near: { type: "Point", coordinates: coords },
-       distanceField: "dist.calculated",
-       includeLocs: "dist.location",
-       spherical: true
-    }
-}
-  ]
-      ).limit(limit).exec(function(err, locations) {
-        if (err) {
-        console.log(err);
-        res.status(500).send({message: "Some error occurred while retrieving locations."});
-
-        }
-        res.send(locations);
-      });
 };
 
-exports.update = function(req, res) {
-    // Update a note identified by the noteId in the request
-    Location.findById(req.params.noteId, function(err, note) {
-        if(err) {
-            res.status(500).send({message: "Could not find a note with id " + req.params.noteId});
-        }
+const deleteUser = async (req, res) => {
 
-        note.title = req.body.title;
-        note.content = req.body.content;
-
-        note.save(function(err, data){
-            if(err) {
-                res.status(500).send({message: "Could not update note with id " + req.params.noteId});
-            } else {
-                res.send(data);
-            }
-        });
-    });
+    const user = req.params.id
+    const deleteuser = await User.findByIdAndDelete({ _id: user })
+    return res.send({ msg: "user deleted" })
 };
 
-exports.delete = function(req, res) {
-    // Delete a note with the specified noteId in the request
-    Location.remove({_id: req.params.noteId}, function(err, data) {
-        if(err) {
-            res.status(500).send({message: "Could not delete note with id " + req.params.id});
-        } else {
-            res.send({message: "Note deleted successfully!"})
-        }
-    });
-};
+
+module.exports.createuser = createuser
+module.exports.findAll = findAll
+module.exports.update = update
+module.exports.deleteUser = deleteUser
+module.exports.findOne = findOne
